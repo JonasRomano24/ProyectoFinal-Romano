@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito - Tienda Tecnológica </title>
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.26.20/dist/sweetalert2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+<body>
+    <header class="main-header">
+        <div class="header-content">
+            <h1>Tienda TECNOLOGICA</h1>
+
+            <nav class="main-nav">
+                <a href="../index.html" class="nav-link">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    Carrito
+                    <span class="cart-count" id="cartCount">0</span>
+                </a>
+
+                <a href="../pages/productos.html" class="nav-link">
+                    <i class="fa-solid fa-box-open"></i>
+                    Productos
+                </a>
+
+                
+
+                <div id="userArea"></div>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+
+        <section class="carrito-layout">
+
+            <div class="carrito-items">
+                <section id="carrito"></section>
+            </div>
+
+            <div class="carrito-resumen">
+
+                <section id="totales"></section>
+                <section id="resumen"></section>
+
+                <div class="botones">
+                    <button id="vaciarBtn">Vaciar Carrito</button>
+                    <button id="finalizarBtn">Finalizar Compra</button>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="recomendados">
+            <h2>Productos recomendados</h2>
+            <div id="recomendadosContainer"></div>
+        </section>
+
+    </main>
+
+
+
+    <script src="
+https://cdn.jsdelivr.net/npm/sweetalert2@11.26.20/dist/sweetalert2.all.min.js
+"></script>
+
+    <script src="js/carrito.js"></script>
+    <script src="js/login.js"></script>
+</body>
+
+</html>
