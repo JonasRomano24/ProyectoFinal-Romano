@@ -79,6 +79,13 @@ catalogoDiv.addEventListener("click", (e) => {
 function agregarAlCarrito(id) {
 
     const producto = productos.find(p => p.id === id);
+
+    // Mejora 1: validación de producto
+    if (!producto) {
+        console.error("Producto no encontrado");
+        return;
+    }
+
     const item = carrito.find(p => p.id === id);
 
     if (item) {
@@ -96,6 +103,14 @@ function agregarAlCarrito(id) {
 
     guardarCarrito();
     actualizarContador();
+
+    // Mejora 2: SweetAlert feedback visual
+    Swal.fire({
+        icon: "success",
+        title: "Producto agregado al carrito",
+        timer: 1000,
+        showConfirmButton: false
+    });
 
 }
 

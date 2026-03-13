@@ -18,10 +18,11 @@ const vaciarBtn = document.getElementById("vaciarBtn");
 const finalizarBtn = document.getElementById("finalizarBtn");
 
 
-
 // ===== FETCH PRODUCTOS =====
 async function cargarProductos() {
+
     try {
+
         const response = await fetch("../json/productos.json");
 
         if (!response.ok) {
@@ -29,17 +30,23 @@ async function cargarProductos() {
         }
 
         const data = await response.json();
+
         productos = data;
 
         mostrarRecomendados();
 
     } catch (error) {
+
         console.error("Error cargando productos:", error);
+
     }
+
 }
+
 
 // ===== RECOMENDADOS =====
 function mostrarRecomendados() {
+
     if (!recomendadosContainer) return;
 
     const idsCarrito = carrito.map(p => p.id);
@@ -52,23 +59,37 @@ function mostrarRecomendados() {
     recomendadosContainer.innerHTML = "";
 
     recomendados.forEach(prod => {
+
         const div = document.createElement("div");
         div.className = "producto-recomendado";
 
-        div.innerHTML = `
-            <h4>${prod.nombre}</h4>
-            <p>$${prod.precio}</p>
-            <button onclick="agregarAlCarrito(${prod.id})">
-                Agregar
-            </button>
-        `;
+        const titulo = document.createElement("h4");
+        titulo.textContent = prod.nombre;
+
+        const precio = document.createElement("p");
+        precio.textContent = "$" + prod.precio;
+
+        const btn = document.createElement("button");
+        btn.textContent = "Agregar";
+
+        btn.addEventListener("click", () => {
+            agregarAlCarrito(prod.id);
+        });
+
+        div.appendChild(titulo);
+        div.appendChild(precio);
+        div.appendChild(btn);
 
         recomendadosContainer.appendChild(div);
+
     });
+
 }
+
 
 // ===== CARRITO =====
 function agregarAlCarrito(id) {
+
     const producto = productos.find(p => p.id === id);
     const item = carrito.find(p => p.id === id);
 
@@ -79,25 +100,34 @@ function agregarAlCarrito(id) {
     }
 
     actualizarEstado();
+
 }
 
 function borrarProducto(id) {
+
     carrito = carrito.filter(item => item.id !== id);
+
     actualizarEstado();
+
 }
+
 
 // ===== RENDER CARRITO =====
 function mostrarCarrito() {
+
     if (!carritoDiv) return;
 
     carritoDiv.innerHTML = "";
 
     if (carrito.length === 0) {
+
         carritoDiv.innerHTML = "<p>El carrito está vacío.</p>";
         return;
+
     }
 
     carrito.forEach(item => {
+
         const div = document.createElement("div");
         div.className = "item-carrito";
 
@@ -105,17 +135,28 @@ function mostrarCarrito() {
             <p><strong>${item.nombre}</strong></p>
             <p>Cantidad: ${item.cantidad}</p>
             <p>$${(item.precio * item.cantidad).toFixed(2)}</p>
-            <button onclick="borrarProducto(${item.id})">
-                Eliminar
-            </button>
         `;
 
+        const btn = document.createElement("button");
+        btn.textContent = "Eliminar";
+
+        btn.addEventListener("click", () => {
+            borrarProducto(item.id);
+        });
+
+        div.appendChild(btn);
         carritoDiv.appendChild(div);
+
     });
+
+    localStorage.setItem("carrito", JSON.stringify(carrito));
+
 }
+
 
 // ===== TOTALES =====
 function calcularTotales() {
+
     const subtotal = carrito.reduce(
         (acc, item) => acc + item.precio * item.cantidad,
         0
@@ -133,12 +174,16 @@ function calcularTotales() {
         impuesto,
         total: subtotal - descuento + impuesto
     };
+
 }
 
 function mostrarTotales() {
+
     if (!totalesDiv || carrito.length === 0) {
+
         totalesDiv.innerHTML = "";
         return;
+
     }
 
     const t = calcularTotales();
@@ -150,10 +195,13 @@ function mostrarTotales() {
         <p>IVA: $${t.impuesto.toFixed(2)}</p>
         <strong>Total: $${t.total.toFixed(2)}</strong>
     `;
+
 }
+
 
 // ===== CONTADOR CARRITO =====
 function actualizarContadorCarrito() {
+
     if (!cartCount) return;
 
     const totalItems = carrito.reduce(
@@ -162,130 +210,173 @@ function actualizarContadorCarrito() {
     );
 
     cartCount.textContent = totalItems;
+
 }
+
 
 // ===== ACTUALIZAR ESTADO =====
 function actualizarEstado() {
+
     localStorage.setItem("carrito", JSON.stringify(carrito));
 
     actualizarContadorCarrito();
     mostrarCarrito();
     mostrarTotales();
     mostrarRecomendados();
+
 }
+
 
 // ===== VACIAR CARRITO =====
 if (vaciarBtn) {
+
     vaciarBtn.addEventListener("click", () => {
+
         carrito = [];
         localStorage.removeItem("carrito");
+
         actualizarEstado();
+
     });
+
 }
+
 
 // ===== FINALIZAR COMPRA =====
 if (finalizarBtn) {
     finalizarBtn.addEventListener("click", () => {
 
-        if (!usuario) {
-            const opcion = confirm(
-                "¿Ya tienes cuenta? Aceptar para iniciar sesión, Cancelar para registrarte."
-            );
+        const usuario = JSON.parse(localStorage.getItem("usuario"));
 
-            if (opcion) overlayLogin.classList.add("active");
-            else overlay.classList.add("active");
-
-        } else {
-            mostrarFormularioPago();
+        if (carrito.length === 0) {
+            Swal.fire({
+                icon: "warning",
+                title: "Tu carrito está vacío"
+            });
+            return;
         }
+
+        if (!usuario) {
+            Swal.fire({
+                icon: "warning",
+                title: "Debes iniciar sesión para finalizar la compra"
+            });
+            return;
+        }
+
+        mostrarFormularioPago();
 
     });
 }
 
+
 // ===== FORMULARIO DE PAGO =====
-function mostrarFormularioPago(){
+function mostrarFormularioPago() {
 
-Swal.fire({
+    Swal.fire({
 
-title: "Datos de la tarjeta",
+        title: "Datos de la tarjeta",
 
-html: `
+        html: `
 <input id="titular" class="swal2-input" placeholder="Nombre del titular">
-
 <input id="numero" class="swal2-input" placeholder="Número de tarjeta">
-
 <input id="exp" class="swal2-input" placeholder="MM/AA">
-
 <input id="cvv" class="swal2-input" placeholder="CVV">
 `,
 
-confirmButtonText: "Pagar",
+        confirmButtonText: "Pagar",
 
-focusConfirm:false,
+        focusConfirm: false,
 
-didOpen:()=>{
+        didOpen: () => {
 
-const numeroInput=document.getElementById("numero");
-const expInput=document.getElementById("exp");
-const cvvInput=document.getElementById("cvv");
+            const numeroInput = document.getElementById("numero");
+            const expInput = document.getElementById("exp");
+            const cvvInput = document.getElementById("cvv");
 
-numeroInput.addEventListener("input",(e)=>{
+            numeroInput.addEventListener("input", (e) => {
 
-let valor=e.target.value.replace(/\s/g,"").replace(/\D/g,"");
-valor=valor.match(/.{1,4}/g)?.join(" ")||"";
-e.target.value=valor;
+                let valor = e.target.value.replace(/\s/g, "").replace(/\D/g, "");
+                valor = valor.match(/.{1,4}/g)?.join(" ") || "";
+                e.target.value = valor;
 
-});
+            });
 
-expInput.addEventListener("input",(e)=>{
+            expInput.addEventListener("input", (e) => {
 
-let valor=e.target.value.replace(/\D/g,"");
+                let valor = e.target.value.replace(/\D/g, "");
 
-if(valor.length>=3){
-valor=valor.slice(0,2)+"/"+valor.slice(2,4);
+                if (valor.length >= 3) {
+                    valor = valor.slice(0, 2) + "/" + valor.slice(2, 4);
+                }
+
+                e.target.value = valor;
+
+            });
+
+            cvvInput.addEventListener("input", (e) => {
+
+                e.target.value = e.target.value.replace(/\D/g, "").slice(0, 3);
+
+            });
+
+        },
+
+        preConfirm: () => {
+
+            const titular = document.getElementById("titular").value.trim();
+            const numero = document.getElementById("numero").value.replace(/\s/g, "");
+            const exp = document.getElementById("exp").value;
+            const cvv = document.getElementById("cvv").value;
+
+            if (!titular || !numero || !exp || !cvv) {
+                Swal.showValidationMessage("Completa todos los campos");
+                return false;
+            }
+
+            // VALIDACION TARJETA (16 DIGITOS)
+            if (numero.length !== 16) {
+                Swal.showValidationMessage("La tarjeta debe tener 16 números");
+                return false;
+            }
+
+            // VALIDACION FECHA
+            const partes = exp.split("/");
+            if (partes.length !== 2) {
+                Swal.showValidationMessage("Fecha inválida");
+                return false;
+            }
+
+            const mes = parseInt(partes[0]);
+            const anio = parseInt(partes[1]);
+
+            if (mes < 1 || mes > 12) {
+                Swal.showValidationMessage("Mes inválido");
+                return false;
+            }
+
+            // VALIDACION AÑO (mayor a 26)
+            if (anio <= 25) {
+                Swal.showValidationMessage("La tarjeta está vencida");
+                return false;
+            }
+
+            return { titular, numero };
+
+        }
+
+    }).then((result) => {
+
+        if (result.isConfirmed && result.value) {
+
+            mostrarFactura(result.value);
+
+        }
+
+    });
+
 }
 
-e.target.value=valor;
-
-});
-
-cvvInput.addEventListener("input",(e)=>{
-
-e.target.value=e.target.value.replace(/\D/g,"").slice(0,3);
-
-});
-
-},
-
-preConfirm:()=>{
-
-const titular=document.getElementById("titular").value;
-const numero=document.getElementById("numero").value;
-const exp=document.getElementById("exp").value;
-const cvv=document.getElementById("cvv").value;
-
-if(!titular || !numero || !exp || !cvv){
-
-Swal.showValidationMessage("Completa todos los campos");
-return false;
-
-}
-
-return {titular,numero};
-
-}
-
-}).then((result)=>{
-
-if(result.isConfirmed && result.value){
-
-mostrarFactura(result.value);
-
-}
-
-});
-
-}
 
 // ===== FACTURA =====
 function mostrarFactura(datosTarjeta) {
@@ -339,8 +430,11 @@ function mostrarFactura(datosTarjeta) {
         localStorage.removeItem("carrito");
 
         actualizarEstado();
+
     });
+
 }
+
 
 // ===== INIT =====
 document.addEventListener("DOMContentLoaded", () => {
