@@ -369,7 +369,7 @@ function mostrarFormularioPago() {
 
         if (result.isConfirmed && result.value) {
 
-            mostrarFactura(result.value);
+            mostrarFactura(result.value, usuario);
 
         }
 
@@ -379,7 +379,7 @@ function mostrarFormularioPago() {
 
 
 // ===== FACTURA =====
-function mostrarFactura(datosTarjeta) {
+function mostrarFactura(datosTarjeta, usuario)  {
 
     if (!datosTarjeta) return;
 
